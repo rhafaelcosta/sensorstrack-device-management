@@ -68,7 +68,13 @@ public class SensorController {
         return convertToModel(sensor);
     }
 
-
+    @DeleteMapping("/{sensorId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void delete(@PathVariable TSID sensorId) {
+        Sensor sensor = sensorRepository.findById(new SensorId(sensorId))
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        sensorRepository.delete(sensor);
+    }
 
     private SensorResponse convertToModel(Sensor sensor) {
         return SensorResponse.builder()
