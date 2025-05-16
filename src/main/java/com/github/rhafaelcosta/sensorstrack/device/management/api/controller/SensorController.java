@@ -68,12 +68,30 @@ public class SensorController {
         return convertToModel(sensor);
     }
 
+    @PutMapping("/{sensorId}/enable")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void enable(@PathVariable TSID sensorId) {
+        Sensor sensor = sensorRepository.findById(new SensorId(sensorId))
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        sensor.setEnabled(true);
+        this.sensorRepository.save(sensor);
+    }
+
     @DeleteMapping("/{sensorId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable TSID sensorId) {
         Sensor sensor = sensorRepository.findById(new SensorId(sensorId))
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         sensorRepository.delete(sensor);
+    }
+
+    @DeleteMapping("/{sensorId}/enable")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void disable(@PathVariable TSID sensorId) {
+        Sensor sensor = sensorRepository.findById(new SensorId(sensorId))
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        sensor.setEnabled(false);
+        this.sensorRepository.save(sensor);
     }
 
     private SensorResponse convertToModel(Sensor sensor) {
