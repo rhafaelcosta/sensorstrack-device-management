@@ -53,6 +53,23 @@ public class SensorController {
         return convertToModel(sensor);
     }
 
+    @PutMapping("/{sensorId}")
+    public SensorResponse update(@PathVariable TSID sensorId, @RequestBody SensorRequest request) {
+        Sensor sensor = sensorRepository.findById(new SensorId(sensorId))
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        sensor.setName(request.getName());
+        sensor.setLocation(request.getLocation());
+        sensor.setIp(request.getIp());
+        sensor.setModel(request.getModel());
+        sensor.setProtocol(request.getProtocol());
+
+        sensor = sensorRepository.save(sensor);
+        return convertToModel(sensor);
+    }
+
+
+
     private SensorResponse convertToModel(Sensor sensor) {
         return SensorResponse.builder()
                 .id(sensor.getId().getValue())
