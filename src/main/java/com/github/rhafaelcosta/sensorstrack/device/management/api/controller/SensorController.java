@@ -7,9 +7,14 @@ import com.github.rhafaelcosta.sensorstrack.device.management.common.IdGenerator
 import com.github.rhafaelcosta.sensorstrack.device.management.domain.model.Sensor;
 import com.github.rhafaelcosta.sensorstrack.device.management.domain.model.SensorId;
 import com.github.rhafaelcosta.sensorstrack.device.management.domain.repository.SensorRepository;
+import io.hypersistence.tsid.TSID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequiredArgsConstructor
@@ -17,6 +22,19 @@ import org.springframework.web.bind.annotation.*;
 public class SensorController {
 
     private final SensorRepository sensorRepository;
+
+    @GetMapping
+    public Page<SensorResponse> search(@PageableDefault Pageable pageable) {
+        Page<Sensor> sensors = sensorRepository.findAll(pageable);
+        return sensors.map(this::convertToModel);
+    }
+
+    @GetMapping("{sensorId}")
+    public SensorResponse findById(@PathVariable TSID sensorId) {
+        Sensor sensor = this.sensorRepository.findById(new SensorId(sensorId))
+                .orElseThrow( () -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        return convertToModel(sensor);
+    }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -32,6 +50,10 @@ public class SensorController {
                 .build();
 
         sensor = sensorRepository.saveAndFlush(sensor);
+        return convertToModel(sensor);
+    }
+
+    private SensorResponse convertToModel(Sensor sensor) {
         return SensorResponse.builder()
                 .id(sensor.getId().getValue())
                 .ip(sensor.getIp())
