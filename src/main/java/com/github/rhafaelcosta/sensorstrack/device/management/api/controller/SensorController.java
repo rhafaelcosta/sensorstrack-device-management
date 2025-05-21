@@ -1,6 +1,7 @@
 package com.github.rhafaelcosta.sensorstrack.device.management.api.controller;
 
 
+import com.github.rhafaelcosta.sensorstrack.device.management.api.client.SensorMonitoringClient;
 import com.github.rhafaelcosta.sensorstrack.device.management.api.model.SensorRequest;
 import com.github.rhafaelcosta.sensorstrack.device.management.api.model.SensorResponse;
 import com.github.rhafaelcosta.sensorstrack.device.management.common.IdGenerator;
@@ -22,6 +23,7 @@ import org.springframework.web.server.ResponseStatusException;
 public class SensorController {
 
     private final SensorRepository sensorRepository;
+    private final SensorMonitoringClient sensorMonitoringClient;
 
     @GetMapping
     public Page<SensorResponse> search(@PageableDefault Pageable pageable) {
@@ -75,6 +77,7 @@ public class SensorController {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         sensor.setEnabled(true);
         this.sensorRepository.save(sensor);
+        sensorMonitoringClient.enableMonitoring(sensorId);
     }
 
     @DeleteMapping("/{sensorId}")
@@ -83,6 +86,7 @@ public class SensorController {
         Sensor sensor = sensorRepository.findById(new SensorId(sensorId))
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         sensorRepository.delete(sensor);
+        sensorMonitoringClient.disableMonitoring(sensorId);
     }
 
     @DeleteMapping("/{sensorId}/enable")
@@ -92,6 +96,7 @@ public class SensorController {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         sensor.setEnabled(false);
         this.sensorRepository.save(sensor);
+        sensorMonitoringClient.disableMonitoring(sensorId);
     }
 
     private SensorResponse convertToModel(Sensor sensor) {
