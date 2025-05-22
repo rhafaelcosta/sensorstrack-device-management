@@ -2,6 +2,7 @@ package com.github.rhafaelcosta.sensorstrack.device.management.api.controller;
 
 
 import com.github.rhafaelcosta.sensorstrack.device.management.api.client.SensorMonitoringClient;
+import com.github.rhafaelcosta.sensorstrack.device.management.api.model.SensorDetailResponse;
 import com.github.rhafaelcosta.sensorstrack.device.management.api.model.SensorRequest;
 import com.github.rhafaelcosta.sensorstrack.device.management.api.model.SensorResponse;
 import com.github.rhafaelcosta.sensorstrack.device.management.common.IdGenerator;
@@ -33,9 +34,24 @@ public class SensorController {
 
     @GetMapping("{sensorId}")
     public SensorResponse findById(@PathVariable TSID sensorId) {
+        var sensor = this.sensorRepository.findById(new SensorId(sensorId))
+                .orElseThrow( () -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        return convertToModel(sensor);
+
+    }
+
+    @GetMapping("{sensorId}/detail")
+    public SensorDetailResponse findByIdWithDetail(@PathVariable TSID sensorId) {
         Sensor sensor = this.sensorRepository.findById(new SensorId(sensorId))
                 .orElseThrow( () -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-        return convertToModel(sensor);
+        var sensorResponse = convertToModel(sensor);
+        var monitoringResponse = sensorMonitoringClient.getDetail(sensorId);
+
+        return SensorDetailResponse.builder()
+                .sensor(sensorResponse)
+                .monitoring(monitoringResponse)
+                .build();
     }
 
     @PostMapping
