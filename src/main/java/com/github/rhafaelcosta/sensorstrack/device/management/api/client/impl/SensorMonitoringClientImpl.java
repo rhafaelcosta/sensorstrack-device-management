@@ -4,10 +4,8 @@ import com.github.rhafaelcosta.sensorstrack.device.management.api.client.RestCli
 import com.github.rhafaelcosta.sensorstrack.device.management.api.client.SensorMonitoringClient;
 import com.github.rhafaelcosta.sensorstrack.device.management.api.model.SensorMonitoringResponse;
 import io.hypersistence.tsid.TSID;
-import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
-@Component
 public class SensorMonitoringClientImpl implements SensorMonitoringClient {
 
     private final RestClient restClient;
